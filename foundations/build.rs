@@ -164,6 +164,7 @@ mod security {
             .allowlist_function("seccomp_rule_add_exact_array")
             .allowlist_function("seccomp_init")
             .allowlist_function("seccomp_load")
+            .allowlist_function("seccomp_export_pfc")
             .allowlist_function("SCMP_ACT_ERRNO")
             .allowlist_function("prctl")
             .allowlist_type("scmp_arg_cmp")

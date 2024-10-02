@@ -50,8 +50,9 @@ mod sys {
 use self::internal::RawRule;
 use crate::{BootstrapError, BootstrapResult};
 use anyhow::{anyhow, bail};
-use std::fmt::Display;
+use std::{fmt::Display, io::Read, os::fd::AsRawFd};
 use sys::PR_GET_SECCOMP;
+use tempfile::tempfile;
 
 pub use self::syscalls::Syscall;
 
@@ -438,6 +439,16 @@ pub fn enable_syscall_sandboxing_ignore_existing(
 
     if ctx.is_null() {
         bail!("failed to initialize seccomp context");
+    }
+
+    let mut outfile = tempfile().unwrap();
+    let retcode = unsafe { sys::seccomp_export_pfc(ctx, outfile.as_raw_fd()) };
+    if retcode != 0 {
+        println!("Error exporting pfc");
+    } else {
+        let mut input = String::new();
+        outfile.read_to_string(&mut input).unwrap();
+        println!("Read existing seccomp filters: \n{}", input);
     }
 
     for rule in exception_rules {
